@@ -3,6 +3,7 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,13 +24,13 @@ jobs:
 
       - name: Regenerate Gradle wrapper
         run: |
-          gradle wrapper --gradle-version 8.7
+          gradle wrapper --gradle-version 9.3.1
           chmod +x gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '9.3.1'
 
       - name: Fix icon resources and missing resources
         run: |
@@ -69,10 +70,10 @@ jobs:
           KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          GRADLE_OPTS: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
+          GRADLE_OPTS: "-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError"
         run: |
-          ./gradlew assembleRelease --stacktrace --no-daemon
-          ./gradlew bundleRelease --stacktrace --no-daemon
+          ./gradlew assembleRelease --stacktrace --no-daemon --max-workers=2
+          ./gradlew bundleRelease --stacktrace --no-daemon --max-workers=2
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
