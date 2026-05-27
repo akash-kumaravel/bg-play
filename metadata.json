@@ -1,6 +1,0 @@
-{
-  "name": "BGWRAP",
-  "description": "High-fidelity AI Background Remover with batch processing, custom canvas adjustments, crops, replacements (colors, gradients, blurs, backgrounds) and high-resolution export options.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
