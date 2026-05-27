@@ -1,0 +1,87 @@
+name: Build Android APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create env files
+        run: |
+          touch .env.example
+          touch .env
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Regenerate Gradle wrapper
+        run: |
+          gradle wrapper --gradle-version 9.3.1
+          chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Fix icon resources and missing resources
+        run: |
+          find app/src/main/res -name "*.webp" -path "*/mipmap*" -delete
+          for folder in hdpi mdpi xhdpi xxhdpi xxxhdpi; do
+            if [ -f app/src/main/res/mipmap-$folder/ic_launcher.png ]; then
+              cp app/src/main/res/mipmap-$folder/ic_launcher.png \
+                 app/src/main/res/mipmap-$folder/ic_launcher_round.png
+              echo "Created ic_launcher_round for $folder"
+            fi
+          done
+          rm -f app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          rm -f app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          mkdir -p app/src/main/res/xml
+          cat > app/src/main/res/xml/data_extraction_rules.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <data-extraction-rules>
+              <cloud-backup>
+                  <exclude domain="root" path="."/>
+              </cloud-backup>
+          </data-extraction-rules>
+          EOF
+          cat > app/src/main/res/xml/backup_rules.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <full-backup-content>
+              <exclude domain="root" path="."/>
+          </full-backup-content>
+          EOF
+          echo "All resources fixed!"
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/my-upload-key.jks
+
+      - name: Build Release APK and AAB
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease --stacktrace
+          ./gradlew bundleRelease --stacktrace
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BGWrap_release.apk
+          path: app/build/outputs/apk/release/*.apk
+
+      - name: Upload Release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: BGWrap_release.aab
+          path: app/build/outputs/bundle/release/*.aab
