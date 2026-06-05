@@ -306,7 +306,7 @@ class RemBgViewModel(private val repository: ProjectRepository) : ViewModel() {
                 backgroundType.value = BgType.TRANSPARENT
             } catch (e: Exception) {
                 e.printStackTrace()
-                editorError.value = "AI API processing failed: ${e.localizedMessage ?: "Network issue"}"
+                editorError.value = "Too many users are currently using the service. Please try again in a few moments."
             } finally {
                 editorLoading.value = false
             }
@@ -553,7 +553,7 @@ class RemBgViewModel(private val repository: ProjectRepository) : ViewModel() {
                     updateBulkItemStatus(item.id, BulkStatus.SUCCESS, 1.0f, originalPath = origPath, processedPath = processedPath)
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    updateBulkItemStatus(item.id, BulkStatus.FAILED, 1.0f, error = e.localizedMessage ?: "API error")
+                    updateBulkItemStatus(item.id, BulkStatus.FAILED, 1.0f, error = "Too many users are currently using the service. Please try again in a few moments.")
                 }
             }
             
