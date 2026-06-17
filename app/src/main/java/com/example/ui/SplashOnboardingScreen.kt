@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.BrandPrimary
 import com.example.ui.theme.BrandPrimaryLight
 import com.example.ui.theme.BrandSecondary
+import com.example.ui.theme.BrandSecondaryLight
 import com.example.ui.theme.BrandSurfaceLight
+import androidx.compose.ui.draw.scale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -72,14 +74,24 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White,
+                        BrandSurfaceLight.copy(alpha = 0.5f),
+                        BrandPrimaryLight.copy(alpha = 0.15f)
+                    )
+                )
+            )
             .testTag("splash_screen"),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(24.dp)
+            modifier = Modifier
+                .padding(24.dp)
+                .scale(scaleAnim)
         ) {
             // Interactive Concentric AI Logo Node
             Box(
@@ -119,20 +131,21 @@ fun SplashScreen(
 
             // Premium Typography
             Text(
-                text = "BGWRAP",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Black,
+                text = "WELCOME TO",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
                 letterSpacing = 4.sp,
-                color = BrandSecondary,
-                modifier = Modifier.testTag("splash_title")
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Professional AI Engine",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 2.sp,
                 color = BrandPrimary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "BGWRAP",
+                fontSize = 38.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 6.sp,
+                color = BrandSecondary,
+                modifier = Modifier.testTag("splash_title"),
                 textAlign = TextAlign.Center
             )
         }

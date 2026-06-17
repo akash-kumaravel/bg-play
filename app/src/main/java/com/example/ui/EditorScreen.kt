@@ -356,9 +356,13 @@ fun InteractivePreviewArea(
             val width = size.width
             val height = size.height
 
+            if (width <= 0f || height <= 0f || original.width <= 0 || original.height <= 0) {
+                return@Canvas
+            }
+
             // Calculate scaling fit aspect ratio matching image properties
             val imgAspectRatio = original.width.toFloat() / original.height
-            val canvasAspectRatio = width / height
+            val canvasAspectRatio = if (height > 0) width / height else 1f
 
             val drawWidth: Float
             val drawHeight: Float
@@ -374,9 +378,15 @@ fun InteractivePreviewArea(
             val left = (width - drawWidth) / 2 + offset.x
             val top = (height - drawHeight) / 2 + offset.y
 
-            val targetSize = androidx.compose.ui.geometry.Size(drawWidth * scale, drawHeight * scale)
+            val targetSize = androidx.compose.ui.geometry.Size(
+                (drawWidth * scale).coerceAtLeast(1f),
+                (drawHeight * scale).coerceAtLeast(1f)
+            )
             val targetLeft = left - (targetSize.width - drawWidth) / 2
             val targetTop = top - (targetSize.height - drawHeight) / 2
+
+            val dstWidth = targetSize.width.toInt().coerceAtLeast(1)
+            val dstHeight = targetSize.height.toInt().coerceAtLeast(1)
 
             // If cutout is not created, or split view slider on left portion: Draw Original
             if (cutout == null) {
@@ -384,7 +394,7 @@ fun InteractivePreviewArea(
                 drawImage(
                     image = original.asImageBitmap(),
                     dstOffset = androidx.compose.ui.unit.IntOffset(targetLeft.toInt(), targetTop.toInt()),
-                    dstSize = androidx.compose.ui.unit.IntSize(targetSize.width.toInt(), targetSize.height.toInt())
+                    dstSize = androidx.compose.ui.unit.IntSize(dstWidth, dstHeight)
                 )
             } else {
                 // If compare active, we clipping raw vs composed
@@ -424,7 +434,7 @@ fun InteractivePreviewArea(
                             drawImage(
                                 image = customBgBmp!!.asImageBitmap(),
                                 dstOffset = androidx.compose.ui.unit.IntOffset(targetLeft.toInt(), targetTop.toInt()),
-                                dstSize = androidx.compose.ui.unit.IntSize(targetSize.width.toInt(), targetSize.height.toInt())
+                                dstSize = androidx.compose.ui.unit.IntSize(dstWidth, dstHeight)
                             )
                         }
                     }
@@ -433,7 +443,7 @@ fun InteractivePreviewArea(
                         drawImage(
                             image = original.asImageBitmap(),
                             dstOffset = androidx.compose.ui.unit.IntOffset(targetLeft.toInt(), targetTop.toInt()),
-                            dstSize = androidx.compose.ui.unit.IntSize(targetSize.width.toInt(), targetSize.height.toInt())
+                            dstSize = androidx.compose.ui.unit.IntSize(dstWidth, dstHeight)
                         )
                         drawRect(
                             color = Color.White.copy(alpha = 0.75f),
@@ -486,7 +496,7 @@ fun InteractivePreviewArea(
                         drawImage(
                             image = original.asImageBitmap(),
                             dstOffset = androidx.compose.ui.unit.IntOffset(targetLeft.toInt(), targetTop.toInt()),
-                            dstSize = androidx.compose.ui.unit.IntSize(targetSize.width.toInt(), targetSize.height.toInt())
+                            dstSize = androidx.compose.ui.unit.IntSize(dstWidth, dstHeight)
                         )
                     }
                 }

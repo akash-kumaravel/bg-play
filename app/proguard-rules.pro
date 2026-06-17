@@ -1,21 +1,35 @@
 # Add project specific ProGuard rules here.
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep our data entities, response wrappers, and Dao interface methods intact for Room and Moshi
+-keep class com.example.data.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep androidx.room components
+-keep class androidx.room.RoomDatabase { *; }
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @androidx.room.Database class * { *; }
+-keep @androidx.room.Dao class * { *; }
+-keep @androidx.room.Entity class * { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep Moshi JSON fields from being renamed by R8 reflection
+-keepclassmembers class * {
+    @com.squareup.moshi.Json <fields>;
+}
+-keep class com.squareup.moshi.** { *; }
+
+# Preserve Coroutines and Lifecycle components
+-keep class kotlinx.coroutines.** { *; }
+-keep class androidx.lifecycle.** { *; }
+
+# Keep Coil Image loaders
+-keep class coil.** { *; }
+
+# Keep OkHttp & Retrofit helper reflection elements
+-keepattributes Signature, InnerClasses, EnclosingMethod, AnnotationDefault, *Annotation*
+-keep class okhttp3.** { *; }
+-keep class retrofit2.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-dontwarn okio.**
+
